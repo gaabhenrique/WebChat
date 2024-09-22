@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://unpkg.com/phosphor-icons"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="app">
+      <div class="headerContainer">
+        <div id="userInfo">
+          <img
+            src="https://st.depositphotos.com/2101611/3925/v/450/depositphotos_39258193-stock-illustration-anonymous-business-man-icon.jpg"
+            alt="Imagem do usuario"
+          />
+          <div id="userStatus">
+            <strong>Pessoa</strong>
+            <div id="status">Online</div>
+          </div>
+        </div>
+        <div id="closeChat">
+          <i class="ph-x"></i>
+        </div>
+      </div>
+      <div class="chatContainer" id="chatContainer">
+        <div class="dateContainer">Hoje</div>
+      </div>
+      <form class="inputContainer" id="form" action="">
+        <input placeholder="Digite sua menssagem" id="input" />
+        <button type="submit">
+          <i class="ph-paper-plane-right"></i>
+        </button>
+      </form>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      var socket = io();
+      const messages = document.getElementById("chatContainer");
+      const input = document.getElementById("input");
+
+      // Manter o ID do próprio usuário
+      let mySocketId;
+
+      // Obter o ID do socket do cliente atual ao conectar
+      socket.on("connect", () => {
+        mySocketId = socket.id;
+      });
+
+      document.addEventListener("submit", (e) => {
+        e.preventDefault();
+        if (input.value) {
+          socket.emit("message", input.value);
+          input.value = "";
+        }
+      });
+
+      socket.on("message", (data) => {
+        const messageContainer = document.createElement("div");
+        messageContainer.classList.add("messageContainer");
+
+        const timeMessage = document.createElement("div");
+        timeMessage.classList.add("timeMessage");
+        const currentTime = new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        timeMessage.textContent = currentTime;
+
+        const message = document.createElement("div");
+        message.classList.add("message");
+        message.textContent = data.msg;
+
+        if (data.id === mySocketId) {
+          messageContainer.classList.add("you");
+          message.classList.add("you");
+          timeMessage.classList.add("you");
+        } else {
+          message.classList.add("contact");
+          timeMessage.classList.add("contact");
+        }
+
+        messageContainer.appendChild(timeMessage);
+        messageContainer.appendChild(message);
+
+        messages.appendChild(messageContainer);
+      });
+    </script>
+  </body>
+</html>
