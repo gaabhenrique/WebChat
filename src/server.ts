@@ -45,7 +45,10 @@ class App {
   }
 }
 
-const app = new App(3030, 3040);
+const app = new App(
+  Number(process.env.APPLICATION_PORT) | 3030,
+  Number(process.env.SOCKET_PORT) | 3040
+);
 
 app.listenServer();
 app.listenSocket();
